@@ -1,0 +1,157 @@
+version: '3.8'
+
+services:
+  zipkin:
+    image: openzipkin/zipkin
+    ports:
+      - "9411:9411"
+    environment:
+      JAVA_OPTS: "-Duser.timezone=Europe/Warsaw"
+      eureka.client.serviceUrl.defaultZone: http://service-registry:8761/eureka/
+
+  rabbitmq:
+    image: rabbitmq:3.8-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+      eureka.client.serviceUrl.defaultZone: http://service-registry:8761/eureka/
+
+  service-registry:
+    image: service-registry
+    hostname: service-registry
+    ports:
+      - "8761:8761"
+    environment:
+      eureka.instance.hostname: service-registry
+      eureka.client.serviceUrl.defaultZone: http://service-registry:8761/eureka/
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://service-registry:8761/actuator/health" ]
+      timeout: 20s
+      retries: 10
+
+  config-server:
+    image: config-server
+    ports:
+      - "8888:8888"
+    environment:
+      EUREKA_SERVER_URL: http://service-registry:8761/eureka/
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://config-server:8888/actuator/health" ]
+      timeout: 20s
+      retries: 10
+
+  mysqldb:
+    image: mysql:latest
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: passwordToFill
+    volumes:
+      - ./xDbInit:/docker-entrypoint-initdb.d
+
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost" ]
+      timeout: 20s
+      retries: 10
+
+  department-service:
+    image: department-service
+    ports:
+      - "8080:8080"
+    environment:
+      MYSQL_HOST: mysqldb
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/department_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: passwordToFill
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.MySQL8Dialect
+      CONFIG_SERVER_URL: http://config-server:8888
+      EUREKA_SERVER_URL: http://service-registry:8761/eureka/
+      RABBIT_MQ_HOST: rabbitmq
+      MANAGEMENT.ZIPKIN.TRACING.ENDPOINT: http://zipkin:9411/api/v2/spans
+      SPRING_ZIPKIN_ENABLED: true
+    depends_on:
+      config-server:
+        condition: service_healthy
+      mysqldb:
+        condition: service_healthy
+      service-registry:
+        condition: service_healthy
+
+  organization-service:
+    image: organization-service
+    ports:
+      - "8083:8083"
+    environment:
+      server.port: 8083
+      MYSQL_HOST: mysqldb
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/organization_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: passwordToFill
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.MySQL8Dialect
+      CONFIG_SERVER_URL: http://config-server:8888
+      EUREKA_SERVER_URL: http://service-registry:8761/eureka/
+      RABBIT_MQ_HOST: rabbitmq
+      MANAGEMENT.ZIPKIN.TRACING.ENDPOINT: http://zipkin:9411/api/v2/spans
+      SPRING_ZIPKIN_ENABLED: true
+    depends_on:
+      config-server:
+        condition: service_healthy
+      mysqldb:
+        condition: service_healthy
+      service-registry:
+        condition: service_healthy
+
+  employee-service:
+    image: employee-service
+    ports:
+      - "8081:8081"
+    environment:
+      server.port: 8081
+      MYSQL_HOST: mysqldb
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/employee_db
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: passwordToFill
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.MySQL8Dialect
+      CONFIG_SERVER_URL: http://config-server:8888
+      EUREKA_SERVER_URL: http://service-registry:8761/eureka/
+      RABBIT_MQ_HOST: rabbitmq
+      MANAGEMENT.ZIPKIN.TRACING.ENDPOINT: http://zipkin:9411/api/v2/spans
+      SPRING_ZIPKIN_ENABLED: true
+    depends_on:
+      config-server:
+        condition: service_healthy
+      mysqldb:
+        condition: service_healthy
+      service-registry:
+        condition: service_healthy
+
+  api-gateway:
+    image: api-gateway
+    ports:
+      - "9191:9191"
+    environment:
+      server.port: 9191
+      CONFIG_SERVER_URL: http://config-server:8888
+      EUREKA_SERVER_URL: http://service-registry:8761/eureka/
+      MANAGEMENT.ZIPKIN.TRACING.ENDPOINT: http://zipkin:9411/api/v2/spans
+      SPRING_ZIPKIN_ENABLED: true
+    depends_on:
+      config-server:
+        condition: service_healthy
+      mysqldb:
+        condition: service_healthy
+      service-registry:
+        condition: service_healthy
+
+  react-frontend:
+    build:
+      context: ../react-frontend
+      dockerfile: ../react-frontend/Dockerfile
+    ports:
+        - "3000:3000"
