@@ -1,6 +1,10 @@
 # docker-config
+All necessary images are posted on https://hub.docker.com/repositories/jgier47 
+To run the application all you need to do is to navigate to pulled repository docker-config directory inside the command line and type 
+docker compose up
 
-To be able to start the project clone all of the necessary services to one folder to create following structure:
+Everything else will be done automatically
+Please find the project structure below:
 
   ![img.png](img.png)
 
@@ -12,29 +16,3 @@ To be able to start the project clone all of the necessary services to one folde
 6) organization-service: https://github.com/Jgier47/organization-service
 7) react-frontend: https://github.com/Jgier47/employee-frontend
 8) service-registry: https://github.com/Jgier47/service-registry
-
-
-Docker compose requires pre-build docker images of almost all services - except react-frontend.
-To build service image it is necessary that <b> service-registry and config-server</b> will work.
-
-
-The easiest option is to comment part of the docker-compose file leaving only 
-<b>  mysql,service-registry and config-server</b> uncommented. 
-Then go to  docker-config folder and type:
-docker compose up
-
-After that build images with the following names:
-
-service-registry
-organization-service
-employee-service
-config-server
-department-service
-api-gateway
-
-After that stop the containers, uncomment docker compose file and go to docker-config folder and use
-docker compose build
-
-after the frontend image will be created run
-
-docker compose up
