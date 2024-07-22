@@ -1,0 +1,34 @@
+@startuml
+left to right direction
+
+skinparam componentStyle rectangle
+
+package "Data Flow in services" {
+  [Department Service] <<Service>>
+  [Organization Service] <<Service>>
+  [API Gateway] <<Service>>
+  [React Frontend] <<Service>>
+  [Employee Service] <<Service>>
+}
+
+package "Databases" {
+  database "MySQL DB" as mysql {
+    [department_db]
+    [organization_db]
+    [employee_db]
+}
+
+[Department Service] --> [department_db] : "MySQL"
+[Organization Service] --> [organization_db] : "MySQL"
+[Employee Service] --> [employee_db] : "MySQL"
+
+[React Frontend] --> [API Gateway]
+
+[API Gateway] --> [Employee Service]
+[API Gateway] --> [Department Service]
+[API Gateway] --> [Organization Service]
+
+[Employee Service] --> [Department Service]
+[Employee Service] --> [Organization Service]
+
+@enduml
