@@ -1,0 +1,34 @@
+@startuml
+left to right direction
+
+skinparam componentStyle rectangle
+
+package "Configuration flow" {
+
+  [Service Registry] <<Service>>
+  [Config Server] <<Service>>
+  [Department Service] <<Service>>
+  [Organization Service] <<Service>>
+  [Employee Service] <<Service>>
+  [API Gateway] <<Service>>
+  [RabbitMQ] <<Service>>
+}
+
+[Service Registry] --> [Config Server] : "Eureka"
+[Department Service] --> [Service Registry] : "Eureka"
+[Organization Service] --> [Service Registry] : "Eureka"
+[Employee Service] --> [Service Registry] : "Eureka"
+[API Gateway] --> [Service Registry] : "Eureka"
+[Config Server] --> [Service Registry] : "Eureka"
+
+[Department Service] --> [Config Server] : "Config"
+[Organization Service] --> [Config Server] : "Config"
+[Employee Service] --> [Config Server] : "Config"
+[API Gateway] --> [Config Server] : "Config"
+
+[Department Service] <-- [RabbitMQ] : "RabbitMQ"
+[Organization Service] <-- [RabbitMQ] : "RabbitMQ"
+[Employee Service] <-- [RabbitMQ] : "RabbitMQ"
+[API Gateway] <-- [RabbitMQ] : "RabbitMQ"
+
+@enduml

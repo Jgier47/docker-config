@@ -1,0 +1,49 @@
+
+@startuml
+!define RECTANGLE class
+
+package "Services and Ports" {
+  RECTANGLE "api-gateway" <<Service>> {
+    ports : 9191
+  }
+
+  RECTANGLE zipkin <<Service>> {
+    ports : 9411
+  }
+
+  RECTANGLE rabbitmq <<Service>> {
+    ports : 5672, 15672
+  }
+
+  RECTANGLE "service-registry" <<Service>> {
+    ports : 8761
+  }
+
+  RECTANGLE "config-server" <<Service>> {
+    ports : 8888
+  }
+
+  RECTANGLE "department-service" <<Service>> {
+    ports : 8080
+  }
+
+  RECTANGLE "organization-service" <<Service>> {
+    ports : 8083
+  }
+
+  RECTANGLE "employee-service" <<Service>> {
+    ports : 8081
+  }
+
+  RECTANGLE "react-frontend" <<Service>> {
+    ports : 3000
+  }
+}
+
+package "Databases" {
+  RECTANGLE "mysqldb" <<Database>> {
+    ports : 3306
+  }
+}
+
+@enduml
