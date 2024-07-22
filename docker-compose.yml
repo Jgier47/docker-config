@@ -20,7 +20,7 @@ services:
       eureka.client.serviceUrl.defaultZone: http://service-registry:8761/eureka/
 
   service-registry:
-    image: service-registry
+    image: jgier47/service-registry
     hostname: service-registry
     ports:
       - "8761:8761"
@@ -33,7 +33,7 @@ services:
       retries: 10
 
   config-server:
-    image: config-server
+    image: jgier47/config-server
     ports:
       - "8888:8888"
     environment:
@@ -58,7 +58,7 @@ services:
       retries: 10
 
   department-service:
-    image: department-service
+    image: jgier47/department-service
     ports:
       - "8080:8080"
     environment:
@@ -82,7 +82,7 @@ services:
         condition: service_healthy
 
   organization-service:
-    image: organization-service
+    image: jgier47/organization-service
     ports:
       - "8083:8083"
     environment:
@@ -107,7 +107,7 @@ services:
         condition: service_healthy
 
   employee-service:
-    image: employee-service
+    image: jgier47/employee-service
     ports:
       - "8081:8081"
     environment:
@@ -132,7 +132,7 @@ services:
         condition: service_healthy
 
   api-gateway:
-    image: api-gateway
+    image: jgier47/api-gateway
     ports:
       - "9191:9191"
     environment:
@@ -150,8 +150,6 @@ services:
         condition: service_healthy
 
   react-frontend:
-    build:
-      context: ../react-frontend
-      dockerfile: ../react-frontend/Dockerfile
+    image: jgier47/react-frontend
     ports:
         - "3000:3000"
